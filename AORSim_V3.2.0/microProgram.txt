@@ -1,0 +1,261 @@
+!madrA9 je ospluzivanje prekida, prepravi na B1!
+!madr3D je pocetak exec (uslovni skok na tacnu instrukciju), prepravi svuda na 41!
+!madr31 je citanje operanda, prepravi svuda na 30!
+!Provera starta!
+madr00 br (if !START then madr00);
+!Citanje instrukcije!
+madr01 PCout1, MOST1_2, ldMAR, incPC;
+madr02 eMAR, rdCPU, br (if !fcCPU then madr02);
+madr03 MDRout1, ldIR0;
+madr04 br (if !gropr then madr06);
+madr05 br madrB1;
+madr06 br (if l1 then madr41);
+madr07 PCout1, MOST1_2, ldMAR, incPC;
+madr08 eMAR, rdCPU, br (if !fcCPU then madr08);
+madr09 MDRout1, MOST1_3, ldIR1, ldGPRAR, br (if l2_brnch then madr41); // PROBAJ BEZ MOST1_3
+madr0A br (if !gradr then madr0C);
+madr0B br madrB1;
+madr0C br (if l2_arlog then madr14);
+madr0D PCout1, MOST1_2, ldMAR, incPC;
+madr0E eMAR, rdCPU, br (if !fcCPU then madr0E);
+madr0F MDRout1, ldIR2, br (if l3_jump then madr41);
+madr10 br (if l3_arlog then madr14);
+madr11 PCout1, MOST1_2, ldMAR, incPC;
+madr12 eMAR, rdCPU, br (if !fcCPU then madr12);
+madr13 MDRout1, ldIR3;
+!Adresiranja!
+madr14 bradr; // Adresu operanda cuvam i u BW ako zatreba za LEA ili SWP
+!Regdir!
+madr15 br (if ST then madr41);
+madr16 br (if LOADL then madr18); // Kako bi LOADL imao jednobajtni operand, potrebno da ga ucitamo u MDR (cime odbacujemo visi bajt), pa iz MDR u BB
+madr17 GPRout1, ldBB, br madr41;
+madr18 GPRout1, MOST1_3, mxMDR, ldMDR;
+madr19 MDRout1, ldBB, br madr41;
+!Regind! 
+madr1A GPRout1, MOST1_2, ldMAR, ldBW, br (if ST_LEA_SWP then madr41);
+madr1B br madr3A;
+!Preinc!
+madr1C GPRout1, MOST1_2, ldAW;
+madr1D AWout3, inc, ALUout1, MOST1_2, ldAW;
+madr1E AWout3, inc, ALUout1, MOST1_2, ldAW;
+madr1F AWout3, wrGPR, MOST3_2, ldMAR, ldBW, br (if ST_LEA_SWP then madr41);
+madr20 br madr3A;
+madr21 br madr3A; // Visak korak kad sam naknadno sredjivao
+!Memdir!
+madr22 IRDAout3, MOST3_2, ldMAR, ldBW, br (if ST_LEA_SWP then madr41);
+madr23 br madr3A;
+!Memind!
+madr24 IRDAout3, MOST3_2, ldMAR;
+madr25 eMAR, rdCPU, br (if !fcCPU then madr25);
+madr26 MDRout1, ldDWL, incMAR;
+madr27 eMAR, rdCPU, br (if !fcCPU then madr27);
+madr28 MDRout1, ldDWH;
+madr29 DWout2, ldMAR, ldBW, br (if ST_LEA_SWP then madr41);
+madr2A br madr3A;
+!Imm!
+madr2B br (if LOADL then madr2D); // LOADL treba da ima operand duzine 1 bajt. To radimo tako sto dvobajtni operand ucitamo u MDR (tako ce ostati samo nizi bajt) i onda odatle upisemo u BB
+madr2C IRDAout3, MOST3_2, MOST2_1, ldBB, br madr41;
+madr2D IRDAout3, mxMDR, ldMDR;
+madr2E MDRout1, ldBB, br madr41;
+!Brpom!
+madr2F not, ALUout1, ldGPRAR; // Da bih upisao 63 u GPRAR, uradim not na prazan ALU cime dobijem ff, kad to ucitam u GPRAR uzima se samo najnizih 6 bita sto mu dodje 63
+madr30 IRDAout3, MOST3_2, MOST2_1, ldDWL; // Bafer IRDA propustim, upisem u DWL (samo nizi bajt sto je IR15..8), a IRBR mi na visem bajtu ima IR19..19IR19..16, to izolujem upisivanjem IRBR u AW i odatle samo viseg bajta u DWH
+madr31 IRBRout3, MOST3_2, ldAW;
+madr32 AWHout3, MOST3_2, MOST2_1, ldDWH;
+madr33 ABout3, MOST3_2, ldAW; // Treba backupovati AB, pomeraj sabrati sa GPR, upisati u AB (ne moze odmah u MAR jer je mag2 zauzeta sabircima), pa iz AB u MAR, pa vratiti backupovan AB, skociti na citanje operanda
+madr34 GPRout1, ldAB;
+madr35 DWout2, MOST2_1, ldBB;
+madr36 ABout3, BBout2, add, ALUout1, ldAB;
+madr37 ABout3, MOST3_2, ldMAR, ldBW;
+madr38 AWout3, MOST3_2, MOST2_1, ldAB, br(if ST_LEA_SWP then madr41);
+madr39 br madr3A;
+!Citanje operanda!
+madr3A eMAR, rdCPU, br (if !fcCPU then madr3A);
+madr3B br (if LOADL then madr40); // za LOADL treba samo nizi bajt operanda citati
+madr3C MDRout1, ldDWL, incMAR;
+madr3D eMAR, rdCPU, br (if !fcCPU then madr3D);
+madr3E MDRout1, ldDWH;
+madr3F DWout2, MOST2_1, ldBB, br madr41;
+madr40 MDRout1, ldBB, br madr41;
+!Izvrsavanje instrukcije!
+madr41 bropr;
+!Halt!
+madr42 clSTART, br madr00;
+!Intd!
+madr43 clPSWI, br madrB1;
+!Inte!
+madr44 stPSWI, br madrB1;
+!Stivtp!
+madr45 ABout3, ldIVTP, br madrB1;
+!Stsp!
+madr46 ABout3, ldSP, br madrB1;
+!Ld! 
+madr47 BBout2, MOST2_1, ldAB;
+madr48 ldN, ldZ, ldC, ldV, br madrB1;
+!Loadl!
+madr49 ABout3, MOST3_2, ldAW; // Sacuvam AB u AW kako bih visi bajt izdvojio u DWH, BB upisem u DWL, DW upisem u AB
+madr4A AWHout3, MOST3_2, MOST2_1, ldDWH;
+madr4B BBout2, MOST2_1, ldDWL;
+madr4C DWout2, MOST2_1, ldAB;
+madr4D ldZ, ldC, ldV, br madrB1;
+!St!
+madr4E br (if regdir then madr54); // mladji na nizoj, stariji na visoj
+madr4F ABout3, mxMDR, ldMDR, MOST3_2, ldAW;
+madr50 eMAR, eMDR, wrCPU, br (if !fcCPU then madr50);
+madr51 AWHout3, mxMDR, ldMDR, incMAR;
+madr52 eMAR, eMDR, wrCPU, br (if !fcCPU then madr52);
+madr53 br madrB1;
+madr54 ABout3, wrGPR, br madrB1;
+!Lea!
+madr55 BWout2, MOST2_1, ldAB;
+madr56 ldN, ldZ, br madrB1;
+!Add!
+madr57 BBout2, ABout3, add, ALUout1, ldAB, ldC, ldV;
+madr58 ldN, ldZ, br madrB1;
+!Sub!
+madr59 BBout2, ABout3, sub, ALUout1, ldAB, ldC, ldV;
+madr5A ldN, ldZ, br madrB1;
+!And!
+madr5B BBout2, ABout3, and, ALUout1, ldAB;
+madr5C ldN, ldZ, ldC, ldV, br madrB1;
+!Or!
+madr5D BBout2, ABout3, or, ALUout1, ldAB;
+madr5E ldN, ldZ, ldC, ldV, br madrB1;
+!Xor!
+madr5F BBout2, ABout3, xor, ALUout1, ldAB;
+madr60 ldN, ldZ, ldC, ldV, br madrB1;
+!Neg!
+madr61 BBout2, ldAW; // Radim not za BB, pa sabiram sa jedinicom (inkrementiram)
+madr62 AWout3, not, ALUout1, ldAB;
+madr63 ABout3, inc, ALUout1, ldAB;
+madr64 ldN, ldZ, ldC, ldV, br madrB1;
+!Asr, Lsr, Ror i Rorc!
+madr65 shr, ldC;
+madr66 ldN, ldZ, ldV, br madrB1;
+!Asl, Lsl, Rol i Rolc!
+madr67 shl, ldC;
+madr68 ldN, ldZ, ldV, br madrB1;
+!Beql,..., Blsseu!
+madr69 IRBRout3, br (if !brpom then madrB1);
+madr6A PCout1, IRPOMout3, ADDout2, ldPC, br madrB1;
+!Rti!
+madr6B SPout2, ldMAR, decSP;
+madr6C eMAR, rdCPU, br (if !fcCPU then madr6C);
+madr6D MDRout1, ldPSWH; 
+madr6E SPout2, ldMAR, decSP;
+madr6F eMAR, rdCPU, br (if !fcCPU then madr6F);
+madr70 MDRout1, ldPSWL; // nastavlja se sa rts
+!Rts!
+madr71 SPout2, ldMAR, decSP;
+madr72 eMAR, rdCPU, br (if !fcCPU then madr72);
+madr73 MDRout1, ldDWH;
+madr74 SPout2, ldMAR, decSP;
+madr75 eMAR, rdCPU, br (if !fcCPU then madr75);
+madr76 MDRout1, ldDWL;
+madr77 DWout2, ldPC, br madrB1;
+!JMP!
+madr78 IRJAout2, ldPC, br madrB1;
+!JSR!
+madr79 incSP;
+madr7A SPout2, ldMAR, PCLout3, mxMDR, ldMDR;
+madr7B eMAR, eMDR, wrCPU, br (if !fcCPU then madr7B)
+madr7C incSP;
+madr7D SPout2, ldMAR, PCHout3, mxMDR, ldMDR;
+madr7E eMAR, eMDR, wrCPU, br (if !fcCPU then madr7E)
+madr7F IRJAout2, ldPC, br madrB1;
+
+!Pushall!
+madr80 ABout3, MOST3_2, ldBW;	// Backupujem ACC u BW
+madr81 not, ALUout1, MOST1_2, ldAW;  // Pravim broj 63 u ova 4 koraka
+madr82 AWHout3, MOST3_2, MOST2_1, ldAB;
+madr83 shr;
+madr84 shr, ALUout1, ldBB; // Pisem 0 u BB. BB koristim da pristupam GPR registrima redom od 0 do 63. Umanjujem AB uporedo s tim jer ce mi on govoriti kad smo prosli sve registre (Z signal aktivan)
+
+madr85 BBout2, MOST2_1, ldGPRAR, incSP;
+madr86 GPRout1, MOST1_3, mxMDR, ldMDR, MOST1_2, ldAW; // Nizi bajt registra stavljam na stek, uporedo s tim, oba bajta u AW kako bih posle izdvojio samo visi
+madr87 SPout2, ldMAR;
+madr88 eMAR, eMDR, wrCPU, br (if !fcCPU then madr88);
+madr89 incSP, AWHout3, mxMDR, ldMDR;                  // Visi bajt registra stavljam na stek
+madr8A SPout2, ldMAR;
+madr8B eMAR, eMDR, wrCPU, br (if !fcCPU then madr8B);
+
+madr8C BBout2, ldAW;  // Mora prvo BB u AW, jer ne moze iz BB u ALU pa iz ALU u BB
+madr8D AWout3, inc, ALUout1, ldBB;
+madr8E ABout3, dec, ALUout1, ldAB, br (if !z then madr85);
+
+madr8F BWout2, MOST2_1, ldAB, br madrB1; // Vracam backupovan ACC
+
+!Popall!
+madr90 ABout3, MOST3_2, ldBW;	// Backupujem ACC u BW
+madr91 not, ALUout1, MOST1_2, ldAW;  // Pravim broj 63 u ova 4 koraka
+madr92 AWHout3, MOST3_2, MOST2_1, ldAB;
+madr93 shr;
+madr94 shr; 
+
+madr95 ABout3, MOST3_2, MOST2_1, ldGPRAR;
+madr96 SPout2, ldMAR, decSP;			// Citam visi bajt sa steka
+madr97 eMAR, rdCPU, br (if !fcCPU then madr97);
+madr98 MDRout1, ldDWH, SPout2, ldMAR, decSP;	// Citam nizi bajt sa steka
+madr99 eMAR, rdCPU, br (if !fcCPU then madr99);
+madr9A MDRout1, ldDWL;
+madr9B DWout2, MOST2_1, MOST1_3, wrGPR;
+
+madr9C ABout3, dec, ALUout1, ldAB, br (if !z then madr95);
+
+madr9D BWout2, MOST2_1, ldAB, br madrB1; // Vracam backupovan ACC
+
+!SWP!
+madr9E eMAR, rdCPU, br (if !fcCPU then madr9E);
+madr9F MDRout1, ldDWL, incMAR;
+madrA0 eMAR, rdCPU, br (if !fcCPU then madrA0);
+madrA1 MDRout1, ldDWH, incMAR;	// incMAR da bismo presli na adresu susednog elementa
+madrA2 DWout2, MOST2_1, ldBB;
+madrA3 eMAR, rdCPU, br (if !fcCPU then madrA3);
+madrA4 MDRout1, ldDWL, incMAR;
+madrA5 eMAR, rdCPU, br (if !fcCPU then madrA5);
+madrA6 MDRout1, ldDWH;
+madrA7 DWout2, MOST2_1, ldAB, ldAW;
+madrA8 BWout2, ldMAR, ABout3, mxMDR, ldMDR, ldN, ldZ; // Pisanje: Adresa prvog elementa, sadrzaj drugog elementa
+madrA9 eMAR, eMDR, wrCPU, br (if !fcCPU then madrA9);
+madrAA incMAR, AWHout3, mxMDR, ldMDR;
+madrAB eMAR, eMDR, wrCPU, br (if !fcCPU then madrAB);
+madrAC incMAR, BBout2, MOST2_1, MOST1_3, mxMDR, ldMDR, ldAW;  // Pisanje: Adresa drugog elementa, sadrzaj prvog elementa
+madrAD eMAR, eMDR, wrCPU, br (if !fcCPU then madrAD);
+madrAE incMAR, AWHout3, mxMDR, ldMDR;
+madrAF eMAR, eMDR, wrCPU, br (if !fcCPU then madrAF);
+madrB0 br madrB1;
+
+!Opsluzivanje prekida!
+madrB1 br (if !prekid then madr00);
+!Cuvanje konteksta procesora!
+madrB2 incSP;
+madrB3 SPout2, ldMAR, PCHout3, mxMDR, ldMDR;
+madrB4 eMAR, eMDR, wrCPU, br (if !fcCPU then madrB4);
+madrB5 incSP;
+madrB6 SPout2, ldMAR, PCLout3, mxMDR, ldMDR;
+madrB7 eMAR, eMDR, wrCPU, br (if !fcCPU then madrB7);
+madrB8 incSP;
+madrB9 SPout2, ldMAR, PSWHout3, mxMDR, ldMDR;
+madrBA eMAR, eMDR, wrCPU, br (if !fcCPU then madrBA);
+madrBB incSP;
+madrBC SPout2, ldMAR, PSWLout3, mxMDR, ldMDR;
+madrBD eMAR, eMDR, wrCPU, br (if !fcCPU then madrBD);
+!Utvrdivanje broja ulaza!
+madrBE br (if !PRINS then madrC0);
+madrBF IRPOMout3, ldBR, clPRINS, br madrC9;
+madrC0 br (if !PRCOD then madrC2);
+madrC1 UINTout3, ldBR, clPRCOD, br madrC9;
+madrC2 br (if !PRADR then madrC4);
+madrC3 UINTout3, ldBR, clPRADR, br madrC9;
+madrC4 br (if !PRINM then madrC6);
+madrC5 UINTout3, ldBR, clPRINM, br madrC9;
+madrC6 br (if !printr then madrC8);
+madrC7 UEXTout3, ldBR, clINTR, ldL, br madrC9;
+madrC8 UINTout3, ldBR;
+!Utvrdivanje adrese prekidne rutine!
+madrC9 IVTPout1, IVTDSPout3, ADDout2, ldMAR;
+madrCA eMAR, rdCPU, br (if !fcCPU then madrCA);
+madrCB MDRout1, ldDWL, incMAR;
+madrCC eMAR, rdCPU, br (if !fcCPU then madrCC);
+madrCD MDRout1, ldDWH;
+madrCE DWout2,ldPC,clPSWI,clPSWT, br madr00;

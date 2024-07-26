@@ -1,0 +1,193 @@
+// dataSize - Sirina podatka. Iste su sirine AB, BB i ALU. Dozvoljene vrednost 8 i 16
+"dataSize", "16"
+
+// numberOfRegisters - Broj registara opste namene u procesoru. Dozvoljene vrednost 0, 2, 4, 8, 16, 32 i 64
+"numberOfRegisters", "64"
+
+// GPRARStartPosition - Pozicija unutar reci na magistrali koja odredjuje pocetni bit koji specificira kom registru opste namene se pristupa.
+// Primer: ako biti 2 do 5 odredju registar opste namene onda je pocetna pozicija 2.
+"GPRARStartPosition", "0"
+
+// GPRNumberOfBits - Broj bita potrebnih za adresiranje unutar registarskog fajla od numberOfRegisters registara.
+"GPRNumberOfBits", "6"
+
+// memdelay - Kasnjenje memorije. Dozvoljena vrednost > 0 i < 256
+"memdelay", "1"
+
+// addressableUnit - Sirina adresibilne jedinice. Iste je sirine DBUS, MDR i IR0-IR3. Dozvoljena vrednost 8 i 16
+"addressableUnit", "8"
+
+// konfiguracija za fetch1 jedinicu se sastoji od veceg broja redova u kojima su opisani trostaticki baferi koji izbacuju sadrzaj na interne magistrale.
+// U jednom redu se nalazi konfiguracija za jedno trostaticko kolo.
+// Konfiguracija za trostaticko kolo se zadaje po formatu: Naziv jedinice ("FETCH1"), Tip ("TRI"), Naziv logickog kola ("IRAD", dozvoljene su samo vrednosti: IRAD – Instrukcijeki registar polje adresa/podatak, IRJA – Instrukcijeki registar polje adresa skoka, IRPOM – Instrukcijeki registar polje pomeraj, IRBR– Instrukcijeki registar polje sa brojem registra/ulaza), Broj ulaznih pinova signala ("16"), Naziv signala povezanog na ulaz E trostatickog kola ("Oper1.IRDAout3"), Naziv signala povezanog na ulaze 0..n-1 trostatickog bafera ("IR23", dozvoljene vrednosti su IRX i IRXX), Naziv izlaza trostatickog kola ("IRAD")
+// primer konfiguracija fetch1 jedinice
+"FETCH1", "TRI", "IRAD", "16", "Oper1.IRDAout3", "IR8", "IR9", "IR10", "IR11", "IR12", "IR13", "IR14", "IR15", "IR0", "IR1", "IR2", "IR3", "IR4", "IR5", "IR6", "IR7", "IRAD"
+"FETCH1", "TRI", "IRJA", "16", "Oper1.IRJAout2", "IR16", "IR17", "IR18", "IR19", "IR20", "IR21", "IR22", "IR23", "IR8", "IR9", "IR10", "IR11", "IR12", "IR13", "IR14", "IR15", "IRJA"
+"FETCH1", "TRI", "IRPOM", "16", "Oper1.IRPOMout3", "IR16", "IR17", "IR18", "IR19", "IR20", "IR21", "IR22", "IR23", "IR23", "IR23", "IR23", "IR23", "IR23", "IR23", "IR23", "IR23", "IRPOM"
+"FETCH1", "TRI", "IRBR", "16", "Oper1.IRBRout3", "IR24", "IR25", "IR26", "IR27", "IR28", "IR29", "IR30", "IR31", "IR16", "IR17", "IR18", "IR19", "IR19", "IR19", "IR19", "IR19", "IRBR"
+
+// konfiguracija za fetch2 jedinicu se sastoji od veceg broja redova u kojima su opisani dekoderi koji se koriste u datoj jedinici.
+// U jednom redu se nalazi konfiguracija za jedan dekoder.
+// konfiguracija za dekoder se zadaje po formatu: Naziv jedinice ("FETCH2"), Tip ("DC"), Naziv dekodera ("DC1"), Broj kontrolnih signala ("2"), Naziv signala povezanog na ulaz E ("START"), Naziv signala povezanog na ulaz 0 dekodeta ("IR30"), Naziv signala povezanog na ulaz 1 dekodeta ("IR31"), Naziv izlaza 0 dekodeta ("Go"), ...
+// Broj kontrolnih signala moze da ima vrednost 1, 2, 3 ili 4. Nazivi izlaznih pinova dekodera moraju da imaju jedinstveno ime. 
+// Ime nekog pina moze da se sastoji od je jednog ili vise slova, znakova, ili znaka _
+// voditi racuna da ostale jedinice procesora koriste ove pinove i da im pristupaju preko imena.
+// primer konfiguracija fetch2 jedinice
+"FETCH2", "DC", "DC1", "2", "START", "IR30", "IR31", "G0", "G1", "G2", "G3"
+"FETCH2", "DC", "DC2", "2", "G0", "IR28", "IR29", "G0_PG0", "G0_PG1", "G0_PG2", "G0_PG3"
+"FETCH2", "DC", "DC3", "2", "G1", "IR28", "IR29", "G1_PG0", "G1_PG1", "G1_PG2", "G1_PG3"
+"FETCH2", "DC", "DC4", "2", "G2", "IR28", "IR29", "G2_PG0", "G2_PG1", "G2_PG2", "G2_PG3"
+"FETCH2", "DC", "DC5", "2", "G3", "IR28", "IR29", "G3_PG0", "G3_PG1", "G3_PG2", "G3_PG3"
+"FETCH2", "DC", "DC6", "4", "G0_PG0", "IR24", "IR25", "IR26", "IR27", "BGRT", "BGRE", "BLSS", "BLEQ", "BGRTU", "BGREU", "BLSSU", "BLEQU", "BEQL", "BNEQ", "BNEG", "BNNG", "BOVF", "BNVF", "BCR", "BNCR",  
+"FETCH2", "DC", "DC7", "4", "G1_PG0", "IR24", "IR25", "IR26", "IR27", "JMP", "JSR", "G1_SLOB1", "G1_SLOB2", "G1_SLOB3", "G1_SLOB4", "G1_SLOB5", "G1_SLOB6", "G1_SLOB7", "G1_SLOB8", "G1_SLOB9", "G1_SLOB10", "G1_SLOB11", "G1_SLOB12", "G1_SLOB13", "G1_SLOB14"
+"FETCH2", "DC", "DC8", "4", "G2_PG0", "IR24", "IR25", "IR26", "IR27", "RTS", "RTI", "ASR", "LSR", "ROR", "RORC", "ASL", "LSL", "ROL", "ROLC", "INTE", "INTD", "STIVTP", "STSP", "PUSHALL", "POPALL"
+"FETCH2", "DC", "DC9", "4", "G2_PG1", "IR24", "IR25", "IR26", "IR27", "HALT", "G2_SLOB1", "G2_SLOB2", "G2_SLOB3", "G2_SLOB4", "G2_SLOB5", "G2_SLOB6", "G2_SLOB7", "G2_SLOB8", "G2_SLOB9", "G2_SLOB10", "G2_SLOB11", "G2_SLOB12", "G2_SLOB13", "G2_SLOB14", "G2_SLOB15"
+"FETCH2", "DC", "DC10", "4", "G3_PG0", "IR24", "IR25", "IR26", "IR27", "LD", "LOADL", "ST", "LEA", "ADD", "SUB", "AND", "OR", "XOR", "NEG", "SWP", "G3_SLOB1", "G3_SLOB2", "G3_SLOB3", "G3_SLOB4", "G3_SLOB5" 
+// Prepoznavanje nacina adresiranja (ako je su IR23 i IR22 respektivno 00,01 ili 10, samo oni odredjuju nacin adresiranja, dok ako su 11, onda IR21 i IR20 odredjuju nacin adresiranja)
+"FETCH2", "DC", "DC11", "2", "G3", "IR22", "IR23", "regdir", "regind", "preinc", "ADR_PG"
+"FETCH2", "DC", "DC12", "2", "ADR_PG", "IR20", "IR21", "memdir", "memind", "brpom", "imm"
+
+// U jednom redu se nalazi konfiguracija za jedno logicko kolo.
+// Konfiguracija za logicko kolo se zadaje po formatu: Naziv jedinice ("FETCH3"), Tip ("OR"), Naziv logickog kola ("ORgradr"), Broj relevantnih pinova signala ("2"), Naziv signala povezanog na ulaz 0 logickog kola ("Fetch2.STB"), Naziv signala povezanog na ulaz 1 logickog kola ("Fetch2.STW"), Naziv izlaznog pina logickog kola ("ORgradr_0")
+// Naziv jedinice je "FETCH3"
+// Dozvoljeni tipovi logickih kola su: AND, OR, NAND, NOR, XOR, NOT, SPLIT
+// Naziv logickog kola se sastoji od je jednog ili vise slova, znakova, ili znaka _. Voditi racuna da naziv logickog kola bude jedinstven.
+// Broj relevantnih pinova mora biti je veci od 0, kod NOT mora biti 1. Kod komponente SPLIT relevantni su izlazni pinovi dok su kod ostalih komponen.
+// Nazivi signala povezanih na ulaze:
+// - za signale generisan u drugim jedinicama se sastoji od: naziva jedinice i naziva signala koji su razdvojenih znakom ".".
+// - za signale generisan u ovoj jedinicama se sastoji od: 
+//  - naziva jedinice i naziva signala koji razdvojenih znakom ".", ili 
+//  - samo od naziva signala.
+// Naziv izlaznog pina logickog kola, predstavlja signal koji se moze koristiti u ostatku sistema, se sastoji od je jednog ili vise slova, znakova, ili znaka _. Voditi racuna da naziv izlaza logickog kola bude jedinstven.
+// primer konfiguracija fetch3 jedinice
+"FETCH3", "OR", "ORspec", "3", "Fetch2.ST", "Fetch2.LEA", "Fetch2.SWP", "ST_LEA_SWP"
+"FETCH3", "OR", "ORgropr", "45", "Fetch2.G0_PG1", "Fetch2.G0_PG2", "Fetch2.G0_PG3", "Fetch2.G1_PG1", "Fetch2.G1_PG2", "Fetch2.G1_PG3", "Fetch2.G2_PG2", "Fetch2.G2_PG3", "Fetch2.G3_PG1", "Fetch2.G3_PG2", "Fetch2.G3_PG3", "Fetch2.G1_SLOB1", "Fetch2.G1_SLOB2", "Fetch2.G1_SLOB3", "Fetch2.G1_SLOB4", "Fetch2.G1_SLOB5", "Fetch2.G1_SLOB6", "Fetch2.G1_SLOB7", "Fetch2.G1_SLOB8", "Fetch2.G1_SLOB9", "Fetch2.G1_SLOB10", "Fetch2.G1_SLOB11", "Fetch2.G1_SLOB12", "Fetch2.G1_SLOB13", "Fetch2.G1_SLOB14", "Fetch2.G2_SLOB1", "Fetch2.G2_SLOB2", "Fetch2.G2_SLOB3", "Fetch2.G2_SLOB4", "Fetch2.G2_SLOB5", "Fetch2.G2_SLOB6", "Fetch2.G2_SLOB7", "Fetch2.G2_SLOB8", "Fetch2.G2_SLOB9", "Fetch2.G2_SLOB10", "Fetch2.G2_SLOB11", "Fetch2.G2_SLOB12", "Fetch2.G2_SLOB13", "Fetch2.G2_SLOB14", "Fetch2.G2_SLOB15", "Fetch2.G3_SLOB1", "Fetch2.G3_SLOB2", "Fetch2.G3_SLOB3", "Fetch2.G3_SLOB4", "Fetch2.G3_SLOB5", "gropr"
+//
+//Nije moglo na jedno I kolo da se dovede ST i immed zbog onog da simulator registruje samo ako su dva ILI kola spojena na I, a ne obicno I
+"FETCH3", "OR", "ORgradr", "3", "Fetch2.ST", "Fetch2.LEA", "Fetch2.SWP", "ORgradr_0"
+"FETCH3", "OR", "ORgradrMode", "1", "Fetch2.imm", "ORgradrMode_0"
+"FETCH3", "OR", "ORgradr1", "2", "Fetch2.LEA", "Fetch2.SWP", "ORgradr_1"
+"FETCH3", "OR", "ORgradrMode1", "1", "Fetch2.regdir", "ORgradrMode_1"
+"FETCH3", "AND", "ANDgradr", "2", "ORgradr_0", "ORgradrMode_0", "gradr0"
+"FETCH3", "AND", "ANDgradr1", "2", "ORgradr_1", "ORgradrMode_1", "gradr1"
+"FETCH3", "OR", "ORgradrFin", "2", "gradr0", "gradr1", "gradr"
+//
+//Za svaki slucaj sam doveo ovako svaki signal konkretno, a probaj posle da umesto ovog imas jedno OR kolo na koje se dovodi Fetch2.G2 samo sto obuhvata sve jednobajtne instr (nisam jer prikazuje u simulatoru ime kola umesto ime izlaznog signala)
+"FETCH3", "OR", "ORL1", "17", "Fetch2.HALT", "Fetch2.RTS", "Fetch2.RTI", "Fetch2.ASR", "Fetch2.LSR", "Fetch2.ROR", "Fetch2.RORC", "Fetch2.ASL", "Fetch2.LSL", "Fetch2.ROL", "Fetch2.ROLC", "Fetch2.INTE", "Fetch2.INTD", "Fetch2.STIVTP", "Fetch2.STSP", "Fetch2.PUSHALL", "Fetch2.POPALL", "l1"
+"FETCH3", "OR", "ORL2_brnch", "16", "Fetch2.BEQL", "Fetch2.BNEQ", "Fetch2.BNEG", "Fetch2.BNNG", "Fetch2.BOVF", "Fetch2.BNVF", "Fetch2.BCR", "Fetch2.BNCR", "Fetch2.BGRT", "Fetch2.BGRE", "Fetch2.BLSS", "Fetch2.BLEQ", "Fetch2.BGRTU", "Fetch2.BGREU", "Fetch2.BLSSU", "Fetch2.BLEQU", "l2_brnch"
+"FETCH3", "OR", "ORL2_arlog_codes", "10", "Fetch2.LD", "Fetch2.LOADL", "Fetch2.ST", "Fetch2.ADD", "Fetch2.SUB", "Fetch2.AND", "Fetch2.OR", "Fetch2.XOR", "Fetch2.NEG", "Fetch2.SWP", "ORL2_arlog_codes_0"
+"FETCH3", "OR", "ORL2_arlog_addressModes", "3", "Fetch2.regdir", "Fetch2.regind", "Fetch2.preinc", "ORL2_arlog_addressModes_0"
+"FETCH3", "OR", "ORL3_jump", "2", "Fetch2.JSR", "Fetch2.JMP", "l3_jump"
+//Sa immed ne moze ST. Ne moze LEA jer immed daje jedan bajt informacija a treba nam dva. Ne moze SWP iz istog razloga (zadaje nam se adresa).
+"FETCH3", "OR", "ORL3_arlog_codes", "11", "Fetch2.LD", "Fetch2.LOADL", "Fetch2.ST", "Fetch2.LEA", "Fetch2.ADD", "Fetch2.SUB", "Fetch2.AND", "Fetch2.OR", "Fetch2.XOR", "Fetch2.NEG", "Fetch2.SWP", "ORL3_arlog_codes_0"
+"FETCH3", "OR", "ORL3_arlog_addressModes", "1", "Fetch2.brpom", "ORL3_arlog_addressModes_0"
+//"FETCH3", "OR", "ORstore", "2", "Fetch2.ST", "Fetch2.STW", "store"
+"FETCH3", "AND", "ANDL2_arlog", "2", "ORL2_arlog_codes_0", "ORL2_arlog_addressModes_0", "l2_arlog"
+"FETCH3", "AND", "ANDL3_arlog", "2", "ORL3_arlog_codes_0", "ORL3_arlog_addressModes_0", "l3_arlog"
+
+// U jednom redu se nalazi konfiguracija za jedno logicko kolo. Konfiguracija je data po istom foramtu kao i za prethodne stepene.
+// Dozvoljeno je postaviti parametar sa brojem ulaznih pinova za jedno OR logicko kolo, kao i imenovati ulazne signale povezane na svaki pin tok logickog OR kola
+// Nije dozvoljeno dodavati nove komponente, preimenovati postojece komponente, niti menjati naziv izlaznim pinovaima.
+// primer konfiguracija exec3 jedinice
+"EXEC3", "OR", "NZOR", "19", "Fetch2.LD", "Fetch2.LOADL", "Fetch2.LEA", "Fetch2.ADD", "Fetch2.SUB", "Fetch2.AND", "Fetch2.OR", "Fetch2.XOR", "Fetch2.ASR", "Fetch2.LSR", "Fetch2.ROR", "Fetch2.RORC", "Fetch2.ASL", "Fetch2.LSL", "Fetch2.ROL", "Fetch2.ROLC", "Fetch2.PUSHALL", "Fetch2.POPALL", "Fetch2.SWP", "NZOR"
+
+// U jednom redu se nalazi konfiguracija za jedan uslov visestrukog uslovnog skoka kod koda operacije 
+// Konfiguracija za logicko kolo se zadaje po formatu: Naziv jedinice ("KMOPR1"), Naziv logickog uslova za visestruki uslovni skok ("Fetch2.NOP"),
+// Adresa u mikroprogramskoj memoriji ("62"). Adresa u mikroprogramskoj memoriji moze biti  data kao decimalna ili heksadecimalna vrednost. 
+// Decemalna vrednost sadrzi samo decimalne cifre, dok heksadecimalna vrednost sadrzi heksadecimalne cifre i zavrsava se slovom "h";
+// Broj ulaza nije ogranicen
+// primer konfiguracija kmopr1 jedinice
+"KMOPR1", "Fetch2.HALT", "42h"
+"KMOPR1", "Fetch2.INTD", "43h"
+"KMOPR1", "Fetch2.INTE", "44h"
+"KMOPR1", "Fetch2.STIVTP", "45h"
+"KMOPR1", "Fetch2.STSP", "46h"
+"KMOPR1", "Fetch2.LD", "47h"
+"KMOPR1", "Fetch2.LOADL", "49h"
+"KMOPR1", "Fetch2.ST", "4Eh"
+"KMOPR1", "Fetch2.LEA", "55h"
+"KMOPR1", "Fetch2.ADD", "57h"
+"KMOPR1", "Fetch2.SUB", "59h"
+"KMOPR1", "Fetch2.AND", "5Bh"
+"KMOPR1", "Fetch2.OR", "5Dh"
+"KMOPR1", "Fetch2.XOR", "5Fh"
+"KMOPR1", "Fetch2.NEG", "61h"
+"KMOPR1", "Fetch2.ASR", "65h"
+"KMOPR1", "Fetch2.LSR", "65h"
+"KMOPR1", "Fetch2.ROR", "65h"
+"KMOPR1", "Fetch2.RORC", "65h"
+"KMOPR1", "Fetch2.ASL", "67h"
+"KMOPR1", "Fetch2.LSL", "67h"
+"KMOPR1", "Fetch2.ROL", "67h"
+"KMOPR1", "Fetch2.ROLC", "67h"
+"KMOPR1", "Fetch2.BEQL", "69h"
+"KMOPR1", "Fetch2.BNEQ", "69h"
+"KMOPR1", "Fetch2.BNEG", "69h"
+"KMOPR1", "Fetch2.BNNG", "69h"
+"KMOPR1", "Fetch2.BOVF", "69h"
+"KMOPR1", "Fetch2.BNVF", "69h"
+"KMOPR1", "Fetch2.BCR", "69h"
+"KMOPR1", "Fetch2.BNCR", "69h"
+"KMOPR1", "Fetch2.BGRT", "69h"
+"KMOPR1", "Fetch2.BGRE", "69h"
+"KMOPR1", "Fetch2.BLSS", "69h"
+"KMOPR1", "Fetch2.BLEQ", "69h"
+"KMOPR1", "Fetch2.BGRTU", "69h"
+"KMOPR1", "Fetch2.BGREU", "69h"
+"KMOPR1", "Fetch2.BLSSU", "69h"
+"KMOPR1", "Fetch2.BLSSU", "69h"
+"KMOPR1", "Fetch2.RTI", "6Bh"
+"KMOPR1", "Fetch2.RTS", "71h"
+"KMOPR1", "Fetch2.JMP", "78h"
+"KMOPR1", "Fetch2.JSR", "79h"
+"KMOPR1", "Fetch2.PUSHALL", "80h"
+"KMOPR1", "Fetch2.POPALL", "90h"
+"KMOPR1", "Fetch2.SWP", "9Eh"
+
+// U jednom redu se nalazi konfiguracija za jedan uslov visestrukog uslovnog skoka kod nacina adresiranja
+// Konfiguracija za logicko kolo se zadaje po formatu: Naziv jedinice ("KMADR1"), Naziv logickog uslova za visestruki uslovni skok ("Fetch2.regdir"), Adresa u mikroprogramskoj memoriji ("26"). Adresa u mikroprogramskoj memoriji moze biti  data kao decimalna ili heksadecimalna vrednost. Decemalna vrednost sadrzi samo decimalne cifre, dok heksadecimalna vrednost sadrzi heksadecimalne cifre i zavrsava se slovom "h";
+// Broj ulaza nije ogranicen
+// primer konfiguracija kmadr1 jedinice
+"KMADR1", "Fetch2.regdir", "15h"
+"KMADR1", "Fetch2.regind", "1Ah"
+"KMADR1", "Fetch2.preinc", "1Ch"
+"KMADR1", "Fetch2.memdir", "22h"
+"KMADR1", "Fetch2.memind", "24h"
+"KMADR1", "Fetch2.imm", "2Bh"
+"KMADR1", "Fetch2.brpom", "2Fh"
+
+// U jednom redu se nalazi konfiguracija za jedan izlaz dekodera u jedinici "Signali upravljacke jedinice"
+// Konfiguracija jednog izlaza se zadaje po formatu: Naziv jedinice ("CONTRODC"), Izlaz dekodera koji se pozmatra ("2"), Uslov koji se posmatra ("Exec2.START"), Koplementarna vrednost ("#")
+// Dozvoljene vrednost za: izlaz dekodera koji se posmatra [0-31]
+// neki izlaza treba da imaju sledece nazive: next (preporuka da bude 0), br, bradr, bropr
+//	uslov koji se posmatra - pinovi definisani u ostalim jedinicama
+//	komplementarna vrednost - "" ako se ne komplementira i "#" ako se komplementira
+// ukoliko su polje za uslov koji se posmatra i komplementarna vrednost onda trece polje predstavlja naziv signala
+// primer konfiguracija CONTRODC jedinice
+"CONTRODC", "0", "", "", "next" 
+"CONTRODC", "1", "", "", "br"
+"CONTRODC", "2", "Exec2.START", "#"
+"CONTRODC", "3", "Bus1.fcCPU", "#"
+"CONTRODC", "4", "Fetch3.gropr", "#"
+"CONTRODC", "5", "Fetch3.l1", ""
+"CONTRODC", "6", "Fetch3.gradr", "#"
+"CONTRODC", "7", "Fetch3.l2_brnch", ""
+"CONTRODC", "8", "Fetch3.l2_arlog", ""
+"CONTRODC", "9", "Fetch3.l3_jump", ""
+"CONTRODC", "10", "Fetch3.l3_arlog", ""
+"CONTRODC", "11", "Fetch2.ST", ""
+"CONTRODC", "12", "Fetch2.LOADL", ""
+"CONTRODC", "13", "Fetch2.LD", ""
+"CONTRODC", "14", "Fetch2.regdir", ""
+"CONTRODC", "15", "Exec4.brpom", "#"
+"CONTRODC", "16", "Intr1.prekid", "#"
+"CONTRODC", "17", "Intr1.PRINS", "#"
+"CONTRODC", "18", "Intr1.PRCOD", "#"
+"CONTRODC", "19", "Intr1.PRADR", "#"
+"CONTRODC", "20", "Intr1.PRINM", "#"
+"CONTRODC", "21", "Intr2.printr", "#"
+"CONTRODC", "22", "", "", "bradr"
+"CONTRODC", "23", "", "", "bropr"
+"CONTRODC", "24", "Fetch3.ST_LEA_SWP", ""
+"CONTRODC", "25", "z", "#"
+"CONTRODC", "31", "Bus1.hack", ""

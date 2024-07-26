@@ -1,0 +1,179 @@
+1000, 06// Napomena: R0 - cuva duzinu niza minus 1; R1 - brojac pri obilasku kroz niz; R2 - pamti da li je doslo do zamene u tekucoj iteraciji; R3 - cuva adresu i-tog elementa niza; R4 - cuva adresu i+1-ov elementa niza;
+1010, 00
+1011, 02
+0200, 08
+0201, 00
+0202, FF
+0203, FF
+0204, 04
+0205, 00
+0206, 01
+0207, 00
+0208, 00
+0209, 00
+020A, 00
+020B, A0
+
+0100, C0// LD 1000
+0101, C0
+0102, 00
+0103, 10
+0104, C5// SUB #0001
+0105, F0
+0106, 01
+0107, 00
+0108, 04// BGRTU 03   (nastavljamo sa algoritmom ako length-1 > 0)
+0109, 03
+010A, 40// JMP FF01   (ako je length-1<=0, skok na poslednju instrukciju algoritma gde pozivamo HALT)    
+010B, FF
+010C, 01
+010D, C2// ST R0
+010E, 00
+010F, C0// LD 1010
+0110, C0
+0111, 10
+0112, 10
+0113, C2// ST R3
+0114, 03
+0115, C2// ST R4
+0116, 04
+0117, C0// LD #1
+0118, F0
+0119, 01
+011A, 00
+011B, C2// ST R2
+011C, 02
+011D, C0// LD R2  (ovo je POCETAK VELIKE PETLJE, ulazimo ako je swapped=/=0)
+011E, 02
+011F, 09// BNEQ 03    
+0120, 03
+0121, 40// JMP FF01   (ako je swapped=0, skok na poslednju instrukciju algoritma gde pozivamo HALT)    
+0122, FF
+0123, 01
+0124, C0// LD #0000
+0125, F0
+0126, 00
+0127, 00
+0128, C2// ST R2
+0129, 02
+012A, C0// LD R1   (ovo je POCETAK PETLJE prolaska unapred kroz niz)
+012B, 01 
+012C, C4// ADD #0001
+012D, F0
+012E, 01
+012F, 00
+0130, C2// ST R1
+0131, 01
+0132, C0// LD R4
+0133, 04
+0134, C2// ST R3   (adresu i+1-og iz prosle iteracije stavljamo za adresu i-tog ove iteracije)
+0135, 03
+0136, C0// LD +(R4)  (adresu i+1-og prebacujemo na adresu narednog elementa i citamo taj elem)
+0137, 84
+0138, C5// SUB (R3)  (radimo a[i+1]-a[i])
+0139, 43
+013A, 01// BGRE 03   (preskacemo zamenu ako smo dobili a[i+1]-a[i]>=0)
+013B, 03
+013C, 41// JSR 01F0  (skok na instrukcije zamene dva elementa i reg koji pamti da je doslo do zamene)
+013D, F0
+013E, 01
+013F, C0// LD r1
+0140, 01
+0141, C5// SUB r0
+0142, 00
+0143, 01// BGRE 03   (ovo je KRAJ PETLJE prolaska unapred kroz niz, izlazimo iz petlje ako je currLength>=Length, tj r1=>r0)
+0144, 03
+0145, 40// JMP 012A
+0146, 2A
+0147, 01
+0148, C0// LD r2   
+0149, 02
+014A, 09// BNEQ 03  (ako je swapped=0 nakon prolaska unapred kroz niz, kraj algoritma)
+014B, 03
+014C, 40// JMP 01FF
+014D, FF
+014E, 01
+014F, C0// LD R1
+0150, 01
+0151, C5// SUB #0001
+0152, F0
+0153, 01
+0154, 00
+0155, C2// ST R0
+0156, 00
+0157, C0// LD #0000
+0158, F0
+0159, 00
+015A, 00
+015B, C2// ST R1
+015C, 01
+015D, C0// LD R1   (ovo je POCETAK PETLJE prolaska unazad kroz niz)
+015E, 01
+015F, C4// ADD #0001
+0160, F0
+0161, 01
+0162, 00
+0163, C2// ST R1
+0164, 01
+0165, C0// LD R3
+0166, 03
+0167, C2// ST R4
+0168, 04
+0169, C5// SUB #0001
+016A, F0
+016B, 01
+016C, 00
+016D, C5// SUB #0001
+016E, F0
+016F, 01
+0170, 00
+0171, C2// ST R3
+0172, 03
+0173, C0// LD (R4)
+0174, 44
+0175, C5// SUB (R3)
+0176, 43
+0177, 01// BGRE 03   (preskacemo zamenu ako smo dobili a[i+1]-a[i]>=0)
+0178, 03
+0179, 41// JSR 01F0
+017A, F0
+017B, 01
+017C, C0// LD R1
+017D, 01
+017E, C5// SUB R0
+017F, 00
+0180, 01// BGRE 03   (ovo je KRAJ PETLJE prolaska unazad kroz niz, izlazimo iz petlje ako je currLength>=Length, tj r1>=r0)
+0181, 03
+0182, 40// JMP 015D
+0183, 5D
+0184, 01
+0185, C0// LD R1
+0186, 01
+0187, C5// SUB #0001
+0188, F0
+0189, 01
+018A, 00
+018B, C2// ST R0
+018C, 00
+018D, C0// LD #0000
+018E, F0
+018F, 00
+0190, 00
+0191, C2// ST R1
+0192, 01
+0193, 40// JMP 011D
+0194, 1D
+0195, 01
+
+
+01F0, CA// SWP (R3)
+01F1, 43
+01F2, C0// LD #0001
+01F3, F0
+01F4, 01
+01F5, 00
+01F6, C2// ST R2
+01F7, 02
+01F8, 80// RTS
+
+01FF, 90// HALT
