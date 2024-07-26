@@ -1,2 +1,5 @@
 # CPU in a Simulator
- Wrote the configuration and microprogram for a simple CPU and simulated its work on various assembly programs. This was an optional project for my "Fundamentals of Computer Science 2" class.
+
+
+https://github.com/user-attachments/assets/f213ae6b-b03b-41db-ad5a-7e99daee3a48
+
